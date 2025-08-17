@@ -1,6 +1,21 @@
+import { db } from '../db';
+import { tasksTable } from '../db/schema';
+import { eq, and } from 'drizzle-orm';
+
 export async function deleteTask(userId: string, taskId: string): Promise<boolean> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is deleting a task from the database.
-    // Should verify the task belongs to the user before deletion.
-    return Promise.resolve(true);
+  try {
+    // Delete task only if it belongs to the specified user
+    const result = await db.delete(tasksTable)
+      .where(and(
+        eq(tasksTable.id, taskId),
+        eq(tasksTable.user_id, userId)
+      ))
+      .execute();
+
+    // Return true if a task was deleted, false if no task was found/deleted
+    return (result.rowCount ?? 0) > 0;
+  } catch (error) {
+    console.error('Task deletion failed:', error);
+    throw error;
+  }
 }

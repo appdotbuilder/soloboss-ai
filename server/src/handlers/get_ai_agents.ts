@@ -1,8 +1,19 @@
+import { db } from '../db';
+import { aiAgentsTable } from '../db/schema';
 import { type AIAgent } from '../schema';
+import { eq } from 'drizzle-orm';
 
-export async function getAIAgents(): Promise<AIAgent[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all active AI agents from the database.
-    // Should return only agents where is_active = true.
-    return Promise.resolve([] as AIAgent[]);
-}
+export const getAIAgents = async (): Promise<AIAgent[]> => {
+  try {
+    // Fetch all active AI agents
+    const results = await db.select()
+      .from(aiAgentsTable)
+      .where(eq(aiAgentsTable.is_active, true))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch AI agents:', error);
+    throw error;
+  }
+};

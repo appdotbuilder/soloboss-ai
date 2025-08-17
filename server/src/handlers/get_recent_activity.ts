@@ -1,8 +1,21 @@
+import { db } from '../db';
+import { activityLogTable } from '../db/schema';
 import { type ActivityLog } from '../schema';
+import { eq, desc } from 'drizzle-orm';
 
 export async function getRecentActivity(userId: string, limit: number = 20): Promise<ActivityLog[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching recent activity logs for a user.
-    // Should return activities ordered by created_at desc with optional pagination limit.
-    return Promise.resolve([] as ActivityLog[]);
+  try {
+    // Query recent activity logs for the user, ordered by created_at desc
+    const results = await db.select()
+      .from(activityLogTable)
+      .where(eq(activityLogTable.user_id, userId))
+      .orderBy(desc(activityLogTable.created_at))
+      .limit(limit)
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch recent activity:', error);
+    throw error;
+  }
 }

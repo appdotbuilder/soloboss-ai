@@ -1,4 +1,7 @@
+import { db } from '../db';
+import { activityLogTable } from '../db/schema';
 import { type ActivityLog } from '../schema';
+import { randomUUID } from 'crypto';
 
 export async function logActivity(
     userId: string,
@@ -7,16 +10,23 @@ export async function logActivity(
     entityType?: 'task' | 'document' | 'chat' | 'profile',
     entityId?: string
 ): Promise<ActivityLog> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating activity log entries for user actions.
-    // Should generate a UUID and timestamp for the activity log entry.
-    return Promise.resolve({
-        id: 'placeholder-id',
-        user_id: userId,
-        action,
-        description,
-        entity_type: entityType || null,
-        entity_id: entityId || null,
-        created_at: new Date()
-    } as ActivityLog);
+    try {
+        // Insert activity log record
+        const result = await db.insert(activityLogTable)
+            .values({
+                id: randomUUID(),
+                user_id: userId,
+                action,
+                description,
+                entity_type: entityType || null,
+                entity_id: entityId || null
+            })
+            .returning()
+            .execute();
+
+        return result[0];
+    } catch (error) {
+        console.error('Activity logging failed:', error);
+        throw error;
+    }
 }
